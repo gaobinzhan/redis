@@ -213,4 +213,6 @@ class CommandConst
     const CLUSTER = 'CLUSTER';//获取集群节点的映射数组
     const READONLY = 'READONLY';//集群相关命令
     const READWRITE = 'READWRITE';//集群相关命令
+
+    const SENTINEL = 'SENTINEL';// redis-sentinel
 }

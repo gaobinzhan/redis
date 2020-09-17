@@ -15,3 +15,12 @@ defined("REDIS_CLUSTER_SERVER_LIST") ?: define('REDIS_CLUSTER_SERVER_LIST',
         ['127.0.0.1', 6385],
     ]);
 defined("REDIS_CLUSTER_AUTH") ?: define('REDIS_CLUSTER_AUTH', '');
+
+
+defined("REDIS_SENTINEL_SERVER_LIST") ?: define("REDIS_SENTINEL_SERVER_LIST", [
+    ['127.0.0.1', 26380],
+    ['127.0.0.1', 26381],
+    ['127.0.0.1', 26382]
+]);
+defined("REDIS_SENTINEL_SERVER_AUTH") ?: define('REDIS_SENTINEL_SERVER_AUTH', 'gaobinzhan');
+
