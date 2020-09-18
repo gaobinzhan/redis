@@ -62,4 +62,12 @@ class RedisSentinelTest extends TestCase
         $this->assertEquals('192.168.3.2', $result['ip']);
         $this->assertEquals('6379', $result['port']);
     }
+
+    public function testSentinelReset()
+    {
+        $result = $this->redis->sentinelReset('mymaster1');
+        $this->assertEquals(0, $result);
+        $result = $this->redis->sentinelReset('mymaster');
+        $this->assertEquals(1, $result);
+    }
 }

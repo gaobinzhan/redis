@@ -12,6 +12,7 @@ use EasySwoole\Redis\CommandHandel\SentinelCommand\SentinelGetMasterAddrByName;
 use EasySwoole\Redis\CommandHandel\SentinelCommand\SentinelMaster;
 use EasySwoole\Redis\CommandHandel\SentinelCommand\SentinelMasters;
 use EasySwoole\Redis\CommandHandel\SentinelCommand\SentinelReplicas;
+use EasySwoole\Redis\CommandHandel\SentinelCommand\SentinelReset;
 use EasySwoole\Redis\CommandHandel\SentinelCommand\SentinelSentinels;
 use EasySwoole\Redis\Config\RedisSentinelConfig;
 use EasySwoole\Redis\Exception\RedisSentinelException;
@@ -222,6 +223,22 @@ class RedisSentinel extends Redis
         $client = $this->defaultSentinelClient;
         $handelClass = new SentinelGetMasterAddrByName($this);
         $command = $handelClass->getCommand($masterName);
+
+        if (!$this->sendCommandByClient($command, $client)) {
+            return false;
+        }
+        $recv = $this->recvByClient($client);
+        if ($recv === null) {
+            return false;
+        }
+        return $handelClass->getData($recv);
+    }
+
+    public function sentinelReset(string $pattern)
+    {
+        $client = $this->defaultSentinelClient;
+        $handelClass = new SentinelReset($this);
+        $command = $handelClass->getCommand($pattern);
 
         if (!$this->sendCommandByClient($command, $client)) {
             return false;
