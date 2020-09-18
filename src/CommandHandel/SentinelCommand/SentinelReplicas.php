@@ -23,12 +23,12 @@ class SentinelReplicas extends AbstractCommandHandel
 
     public function handelRecv(Response $recv)
     {
-        $masterInfos = $recv->getData();
+        $replicas = $recv->getData();
         $result = [];
-        foreach ($masterInfos as $index => $masterInfo) {
-            $masterInfoCount = count($masterInfo);
-            for ($i = 0; $i < $masterInfoCount / 2; $i++) {
-                $result[$index][$masterInfo[$i * 2]] = $masterInfo[$i * 2 + 1];
+        foreach ($replicas as $index => $replica) {
+            $replicaCount = count($replica);
+            for ($i = 0; $i < $replicaCount / 2; $i++) {
+                $result[$index][$replica[$i * 2]] = $replica[$i * 2 + 1];
             }
         }
 
