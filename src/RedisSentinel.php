@@ -11,6 +11,7 @@ use EasySwoole\Redis\CommandHandel\Auth;
 use EasySwoole\Redis\CommandHandel\SentinelCommand\SentinelMaster;
 use EasySwoole\Redis\CommandHandel\SentinelCommand\SentinelMasters;
 use EasySwoole\Redis\CommandHandel\SentinelCommand\SentinelReplicas;
+use EasySwoole\Redis\CommandHandel\SentinelCommand\SentinelSentinels;
 use EasySwoole\Redis\Config\RedisSentinelConfig;
 use EasySwoole\Redis\Exception\RedisSentinelException;
 
@@ -187,6 +188,22 @@ class RedisSentinel extends Redis
     {
         $client = $this->defaultSentinelClient;
         $handelClass = new SentinelReplicas($this);
+        $command = $handelClass->getCommand($masterName);
+
+        if (!$this->sendCommandByClient($command, $client)) {
+            return false;
+        }
+        $recv = $this->recvByClient($client);
+        if ($recv === null) {
+            return false;
+        }
+        return $handelClass->getData($recv);
+    }
+
+    public function sentinelSentinels(string $masterName)
+    {
+        $client = $this->defaultSentinelClient;
+        $handelClass = new SentinelSentinels($this);
         $command = $handelClass->getCommand($masterName);
 
         if (!$this->sendCommandByClient($command, $client)) {

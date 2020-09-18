@@ -48,4 +48,11 @@ class RedisSentinelTest extends TestCase
         $this->assertEquals('192.168.3.3:6379', $result[0]['name']);
         $this->assertEquals('192.168.3.4:6379', $result[1]['name']);
     }
+
+    public function testSentinelSentinels()
+    {
+        $result = $this->redis->sentinelSentinels('mymaster');
+        $this->assertEquals('192.168.3.12', $result[0]['ip']);
+        $this->assertEquals('192.168.3.13', $result[1]['ip']);
+    }
 }
