@@ -8,6 +8,7 @@ namespace EasySwoole\Redis;
 
 
 use EasySwoole\Redis\CommandHandel\Auth;
+use EasySwoole\Redis\CommandHandel\SentinelCommand\SentinelFailOver;
 use EasySwoole\Redis\CommandHandel\SentinelCommand\SentinelGetMasterAddrByName;
 use EasySwoole\Redis\CommandHandel\SentinelCommand\SentinelMaster;
 use EasySwoole\Redis\CommandHandel\SentinelCommand\SentinelMasters;
@@ -239,6 +240,22 @@ class RedisSentinel extends Redis
         $client = $this->defaultSentinelClient;
         $handelClass = new SentinelReset($this);
         $command = $handelClass->getCommand($pattern);
+
+        if (!$this->sendCommandByClient($command, $client)) {
+            return false;
+        }
+        $recv = $this->recvByClient($client);
+        if ($recv === null) {
+            return false;
+        }
+        return $handelClass->getData($recv);
+    }
+
+    public function sentinelFailOver(string $masterName)
+    {
+        $client = $this->defaultSentinelClient;
+        $handelClass = new SentinelFailOver($this);
+        $command = $handelClass->getCommand($masterName);
 
         if (!$this->sendCommandByClient($command, $client)) {
             return false;

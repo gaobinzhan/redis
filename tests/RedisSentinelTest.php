@@ -70,4 +70,14 @@ class RedisSentinelTest extends TestCase
         $result = $this->redis->sentinelReset('mymaster');
         $this->assertEquals(1, $result);
     }
+
+    public function testSentinelFailOver()
+    {
+        $ip = $this->redis->sentinelGetMasterAddrByName('mymaster')['ip'];
+        $result = $this->redis->sentinelFailOver('mymaster');
+        $this->assertTrue($result);
+        sleep(2);
+        $ip1 = $this->redis->sentinelGetMasterAddrByName('mymaster')['ip'];
+        $this->assertNotEquals($ip, $ip1);
+    }
 }
