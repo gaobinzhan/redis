@@ -80,4 +80,10 @@ class RedisSentinelTest extends TestCase
         $ip1 = $this->redis->sentinelGetMasterAddrByName('mymaster')['ip'];
         $this->assertNotEquals($ip, $ip1);
     }
+
+    public function testSentinelCkQuorum()
+    {
+        $result = $this->redis->sentinelCkQuorum('mymaster');
+        $this->assertEquals('OK 3 usable Sentinels. Quorum and failover authorization can be reached', $result);
+    }
 }
