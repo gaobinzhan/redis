@@ -86,4 +86,10 @@ class RedisSentinelTest extends TestCase
         $result = $this->redis->sentinelCkQuorum('mymaster');
         $this->assertEquals('OK 3 usable Sentinels. Quorum and failover authorization can be reached', $result);
     }
+
+    public function testSentinelFlushConfig()
+    {
+        $result = $this->redis->sentinelFlushConfig();
+        $this->assertTrue($result);
+    }
 }

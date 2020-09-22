@@ -10,6 +10,7 @@ namespace EasySwoole\Redis;
 use EasySwoole\Redis\CommandHandel\Auth;
 use EasySwoole\Redis\CommandHandel\SentinelCommand\SentinelCkQuorum;
 use EasySwoole\Redis\CommandHandel\SentinelCommand\SentinelFailOver;
+use EasySwoole\Redis\CommandHandel\SentinelCommand\SentinelFlushConfig;
 use EasySwoole\Redis\CommandHandel\SentinelCommand\SentinelGetMasterAddrByName;
 use EasySwoole\Redis\CommandHandel\SentinelCommand\SentinelMaster;
 use EasySwoole\Redis\CommandHandel\SentinelCommand\SentinelMasters;
@@ -273,6 +274,22 @@ class RedisSentinel extends Redis
         $client = $this->defaultSentinelClient;
         $handelClass = new SentinelCkQuorum($this);
         $command = $handelClass->getCommand($masterName);
+
+        if (!$this->sendCommandByClient($command, $client)) {
+            return false;
+        }
+        $recv = $this->recvByClient($client);
+        if ($recv === null) {
+            return false;
+        }
+        return $handelClass->getData($recv);
+    }
+
+    public function sentinelFlushConfig()
+    {
+        $client = $this->defaultSentinelClient;
+        $handelClass = new SentinelFlushConfig($this);
+        $command = $handelClass->getCommand();
 
         if (!$this->sendCommandByClient($command, $client)) {
             return false;
