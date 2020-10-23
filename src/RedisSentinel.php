@@ -14,6 +14,7 @@ use EasySwoole\Redis\CommandHandel\SentinelCommand\SentinelFlushConfig;
 use EasySwoole\Redis\CommandHandel\SentinelCommand\SentinelGetMasterAddrByName;
 use EasySwoole\Redis\CommandHandel\SentinelCommand\SentinelMaster;
 use EasySwoole\Redis\CommandHandel\SentinelCommand\SentinelMasters;
+use EasySwoole\Redis\CommandHandel\SentinelCommand\SentinelPing;
 use EasySwoole\Redis\CommandHandel\SentinelCommand\SentinelReplicas;
 use EasySwoole\Redis\CommandHandel\SentinelCommand\SentinelReset;
 use EasySwoole\Redis\CommandHandel\SentinelCommand\SentinelSentinels;
@@ -28,11 +29,6 @@ class RedisSentinel extends Redis
     protected $config;
 
     /**
-     * @var array $masterNodeList
-     */
-    protected $masterNodeList = [];
-
-    /**
      * @var SentinelClient[] $sentinelClientList
      */
     protected $sentinelClientList = [];
@@ -42,28 +38,43 @@ class RedisSentinel extends Redis
      */
     protected $defaultSentinelClient = null;
 
+    /**
+     * @var Client $masterClient
+     */
+    protected $masterClient = null;
+
     public function __construct(RedisSentinelConfig $config)
     {
         $this->config = $config;
-        $this->masterNodeInit();
+        $this->sentinelClientInit();
+        $this->masterClientInit();
     }
 
-    protected function masterNodeInit()
+    protected function sentinelClientInit()
     {
-        $serverList = $this->config->getServerList();
-        foreach ($serverList as $server) {
-            list($host, $port) = $server;
+        $nodeList = $this->config->getNodeList();
+        foreach ($nodeList as $node) {
+            list($host, $port) = $node;
             $this->sentinelClientList[] = new SentinelClient($host, $port, $this->config->getPackageMaxLength());
         }
+        if (empty($nodeList) || empty($this->sentinelClientList)) {
+            throw new RedisSentinelException('redis sentinel node list error!');
+        }
+    }
 
+    protected function masterClientInit()
+    {
         foreach ($this->sentinelClientList as $sentinelClient) {
             $this->clientConnect($sentinelClient);
-            $masterInfos = $this->sentinelMasters();
-
-            if ($masterInfos && !empty($masterInfos)) {
-                $this->masterNodeList = $masterInfos;
+            $masterInfo = $this->sentinelGetMasterAddrByName($this->config->getMasterName());
+            if ($masterInfo && isset($masterInfo['ip']) && isset($masterInfo['port'])) {
+                $this->masterClient = new Client((string)$masterInfo['ip'], (int)$masterInfo['port'], $this->config->getPackageMaxLength());
                 break;
             }
+        }
+
+        if (empty($this->masterClient)) {
+            throw new RedisSentinelException('redis sentinel master name error!');
         }
     }
 
@@ -289,6 +300,22 @@ class RedisSentinel extends Redis
     {
         $client = $this->defaultSentinelClient;
         $handelClass = new SentinelFlushConfig($this);
+        $command = $handelClass->getCommand();
+
+        if (!$this->sendCommandByClient($command, $client)) {
+            return false;
+        }
+        $recv = $this->recvByClient($client);
+        if ($recv === null) {
+            return false;
+        }
+        return $handelClass->getData($recv);
+    }
+
+    public function sentinelPing()
+    {
+        $client = $this->defaultSentinelClient;
+        $handelClass = new SentinelPing($this);
         $command = $handelClass->getCommand();
 
         if (!$this->sendCommandByClient($command, $client)) {

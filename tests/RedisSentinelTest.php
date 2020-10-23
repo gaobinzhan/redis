@@ -63,24 +63,6 @@ class RedisSentinelTest extends TestCase
         $this->assertEquals('6379', $result['port']);
     }
 
-    public function testSentinelReset()
-    {
-        $result = $this->redis->sentinelReset('mymaster1');
-        $this->assertEquals(0, $result);
-        $result = $this->redis->sentinelReset('mymaster');
-        $this->assertEquals(1, $result);
-    }
-
-    public function testSentinelFailOver()
-    {
-        $ip = $this->redis->sentinelGetMasterAddrByName('mymaster')['ip'];
-        $result = $this->redis->sentinelFailOver('mymaster');
-        $this->assertTrue($result);
-        sleep(2);
-        $ip1 = $this->redis->sentinelGetMasterAddrByName('mymaster')['ip'];
-        $this->assertNotEquals($ip, $ip1);
-    }
-
     public function testSentinelCkQuorum()
     {
         $result = $this->redis->sentinelCkQuorum('mymaster');
@@ -92,4 +74,27 @@ class RedisSentinelTest extends TestCase
         $result = $this->redis->sentinelFlushConfig();
         $this->assertTrue($result);
     }
+
+    public function testSentinelPing()
+    {
+        $result = $this->redis->sentinelPing();
+        $this->assertEquals('PONG', $result);
+    }
+//    public function testSentinelReset()
+//    {
+//        $result = $this->redis->sentinelReset('mymaster1');
+//        $this->assertEquals(0, $result);
+//        $result = $this->redis->sentinelReset('mymaster');
+//        $this->assertEquals(1, $result);
+//    }
+
+//    public function testSentinelFailOver()
+//    {
+//        $ip = $this->redis->sentinelGetMasterAddrByName('mymaster')['ip'];
+//        $result = $this->redis->sentinelFailOver('mymaster');
+//        $this->assertTrue($result);
+//        sleep(2);
+//        $ip1 = $this->redis->sentinelGetMasterAddrByName('mymaster')['ip'];
+//        $this->assertNotEquals($ip, $ip1);
+//    }
 }
