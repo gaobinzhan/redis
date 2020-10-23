@@ -9,35 +9,53 @@ namespace EasySwoole\Redis\Config;
 
 class RedisSentinelConfig extends RedisConfig
 {
-    protected $serverList = [
+    protected $nodeList = [
         [
             'host' => '127.0.0.1',
             'port' => 26379,
         ]
     ];
 
+    protected $masterName = 'mymaster';
+
     protected $sentinelAuth = null;
 
-    public function __construct(array $serverList = [], array $data = null, $autoCreateProperty = false)
+    public function __construct(array $nodeList = [], array $data = null, $autoCreateProperty = false)
     {
-        !empty($serverList) && ($this->serverList = $serverList);
+        !empty($nodeList) && ($this->nodeList = $nodeList);
         parent::__construct($data, $autoCreateProperty);
     }
 
     /**
      * @return array|array[]
      */
-    public function getServerList()
+    public function getNodeList()
     {
-        return $this->serverList;
+        return $this->nodeList;
     }
 
     /**
-     * @param array|array[] $serverList
+     * @param array|array[] $nodeList
      */
-    public function setServerList($serverList): void
+    public function setNodeList($nodeList): void
     {
-        $this->serverList = $serverList;
+        $this->nodeList = $nodeList;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMasterName(): string
+    {
+        return $this->masterName;
+    }
+
+    /**
+     * @param string $masterName
+     */
+    public function setMasterName(string $masterName): void
+    {
+        $this->masterName = $masterName;
     }
 
     /**
